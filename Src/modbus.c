@@ -178,8 +178,9 @@ static int mb_f4(uint8_t sn)
 			bop += 2;
 			addr += 1;
 		}
-#endif
 	}
+#endif
+	
 	v.num_bytes = (addr - MBAP_ADDR(mb)) << 1;
 	mb->h.len_l = v.num_bytes + 3;
 	mb->h.len_h = 0;
