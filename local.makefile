@@ -1,14 +1,11 @@
 
-#C_SOURCES += Src/huart_tools.c \
-
-
 #LDFLAGS+= -u _printf_float
 
 console:
 	screen /dev/ttyUSB0 115200
 
 flash: all
-	#stm32flash -w build/${TARGET}.bin   -g 0x0 /dev/ttyUSB0
+	#stm32flash -w build/${TARGET}.bin -g 0x0 /dev/ttyUSB0
 	st-flash write build/${TARGET}.bin 0x8000000
 boot:
 	#stm32flash -g 0x0 /dev/ttyUSB0

@@ -41,13 +41,15 @@ A configuration interface is implemented by _telnet_ to port 500.
 
 Only need _Blue Pill_ and _W5500_ module. Connect the power of both boards and then link them as follows:
 
-Blue Pill | W5500
+Blue Pill | W5500 Board
 ----------|------
 PA5 SPI1_SCK  | 10 SCLC
 PA6 SPI1_MISO |  7 MISO
 PA7 SPI1_MOSI |  8 MOSI
 PB0 W5500_CS  |  9 SCS
 PB9 W5500_RST |  3 RST
+GNG           |  4 GNG
+VCC 5v        |  5 5v
 
 To start using only the ethernet module, you can configure the flags
 as follows in `my_config.h`:
