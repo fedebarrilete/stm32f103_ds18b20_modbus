@@ -8,9 +8,10 @@ will) change! Do not use the code found in this project for any
 critical system(s). The use of the code and documentation is at your
 own risk!
 
-In this project he uses a *Blue Pill* (stm32f103c8t6) and a *W5500*
+In this project he uses a *Blue Pill* (stm32f103c8t6) and a
+[W5500](http://wizwiki.net/wiki/doku.php?id=products:w5500:start)
 ethernet board connected to the SPI1 interface. You can use a 16x2 LCD
-display, a rotary encoder with switch and a bmp180 barometer. See
+display, a rotary encoder with switch and a _BMP180_ barometer. See
 [eschematic.pdf](eschematic.pdf)
 
 By default, up to 77 bs18b20 thermometers can be configured, which are
