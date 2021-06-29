@@ -1,7 +1,7 @@
 # stm32f103_ds18b20_modbus
 
 _Welcome to the tm32f103_ds18b20_modbus project main repository!_ Data
-acquisition device for digital thermometers ds18b20 and modbus server.
+acquisition device for digital thermometers ds18b20 and modbus-tcp server.
 
 WARNING: This project is work in progress! Anything can (and probably
 will) change! Do not use the code found in this project for any
