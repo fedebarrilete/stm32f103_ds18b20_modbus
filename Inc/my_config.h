@@ -64,11 +64,11 @@
 #define MY_CFG_NTP_ENABLE       1L 
 #define MY_CFG_RTC_ENABLE       0L /* FIXME: make long test in disable state. */
 #define MY_CFG_DNS_ENABLE       0L /* It is not convenient to enable it. */
-#define MY_CFG_LCD_ENABLE       1L 
-#define MY_CFG_18B20_ENABLE     1L 
-#define MY_CFG_ENCODER_ENABLE   1L /* Specify the type of encoder in
+#define MY_CFG_LCD_ENABLE       0L 
+#define MY_CFG_18B20_ENABLE     0L 
+#define MY_CFG_ENCODER_ENABLE   0L /* Specify the type of encoder in
 				    * encoder_sw.h */
-#define MY_CFG_BAROMETER_ENABLE 1L /* BMP 180 */
+#define MY_CFG_BAROMETER_ENABLE 0L /* BMP 180 */
 #define MY_CFG_MODBUS_ENABLE    1L
 
 #if MY_CFG_ENCODER_ENABLE
