@@ -1,24 +1,26 @@
 # stm32f103_ds18b20_modbus
-Data acquisition device for digital thermometers ds18b20 and modbus server.
+_Welcome to the tm32f103_ds18b20_modbus project main repository!_ Data acquisition device for digital thermometers ds18b20 and modbus server.
 
 WARNING: This project is work in progress! Anything can (and probably will) change! Do not use the code found in this project for any critical system(s). The use of the code and documentation is at your own risk!
 
-_In this project he uses a bluepill (stm32f103c8t6) and a W5500 ethernet board connected to the SPI1 interface. You can use a 16x2 LCD display, a rotary encoder with switch and a bmp180 barometer. See https://github.com/fedebarrilete/stm32f103_ds18b20_modbus/blob/main/eschematic.pdf
+In this project he uses a *Blue Pill* (stm32f103c8t6) and a *W5500* ethernet board connected to the SPI1 interface. You can use a 16x2 LCD display, a rotary encoder with switch and a bmp180 barometer. See 
+[eschematic.pdf](eschematic.pdf)
 
 By default, up to 77 bs18b20 thermometers can be configured, which are read every two seconds. The information of the thermometers is available through the ModBus protocol. The code uses the HAL library and was generated with STM32CubeMX initially.
 
-A configuration interface is implemented by telnet to port 500. 
+A configuration interface is implemented by _telnet_ to port 500. 
 
-You can choose to enable or disable the following features or modules:
+**You can choose to enable or disable the following features or modules:**
 
-**WDT._
-**RTC._ 
-**NTP client (on W5500)._
-**DNS client (on W5500)._
-**LCD 16x02 (via SPI2 on 74HC595)._
-**Thermometers ds18b20 (via OneWire, driver implemented in hardware)._
-**Rotary encoder with switch (via timer 3)._
-**Barometer BMP180 (via I2C)._
-**ModBus server._
-**Debugin._
-**UART1 as a monitor._
+*WDT*<br>
+*RTC*<br> 
+*NTP client (on W5500).*<br>
+*DNS client (on W5500).*<br>
+*LCD 16x02 (via SPI2 on 74HC595).*<br>
+*Thermometers ds18b20 (via OneWire, driver implemented in hardware).*<br>
+*Rotary encoder with switch (via timer 3).*<br>
+*Barometer BMP180 (via I2C).*<br>
+*ModBus server.*<br>
+*Debugin.*<br>
+*UART1 as a monitor.*<br>
+
