@@ -10,7 +10,7 @@ By default, up to 77 bs18b20 thermometers can be configured, which are read ever
 
 A configuration interface is implemented by _telnet_ to port 500. 
 
-**You can choose to enable or disable the following features or modules:**
+**You can choose to enable or disable the following features or modules selecting it in [my_config.h](Inc/my_config.h):**
 
 *WDT*<br>
 *RTC*<br> 
