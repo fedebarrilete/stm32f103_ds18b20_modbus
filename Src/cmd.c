@@ -130,6 +130,6 @@ int execute_line (uint8_t sn, COMMAND *cmd, char *line)
 	if ( ret == CMD_HELP ) {
 		send_help(sn, cmd);
 	}
-	
+
 	return ret;
 }

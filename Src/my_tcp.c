@@ -70,7 +70,7 @@ int tcp_server_run(uint8_t sn, uint16_t port)
 		if ( getSn_SR(sn) == SOCK_ESTABLISHED ) {
 			getsockopt(sn, SO_REMAINSIZE, &rmsize); 
 		} else {
-			disconnect(sn);
+			//disconnect(sn);
 			close(sn);
 			tcp_server_listen_on(sn, port);
 		}
@@ -99,19 +99,11 @@ int tcp_server_menu(uint8_t sn, COMMAND *cmd, uint8_t show_pt )
 	}
 
 	if ( ret == CMD_QUIT ) {
-		disconnect(sn);
+		//disconnect(sn);
 		close(sn);
 	}
-#if 0
-	else if ( ret == -2 ) {
-		disconnect(sn);
-		close(sn);
-		HAL_Delay(1050); /* Wait WDT. */
-	}
-#endif
 	if ( show_pt )
 		send(sn, _prompt[sn], strlen( (char *) _prompt[sn]) );
-		//send(sn, (uint8_t*) "> ", 2 );
 	
 	return ret;
 }
