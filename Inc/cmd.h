@@ -16,7 +16,7 @@
  *   that it may be useful for others.
  *
  *   28/01/2020: Reimplemente for tcp server on STM32 and W5500.
- *   2007: Porter to libiarcontrol on version 0.1.8.
+ *   2007: Port to libiarcontrol on version 0.1.8.
  *   2004: Initial verson on "Camera Control for STAR I."
  **/
 
