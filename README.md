@@ -52,7 +52,7 @@ GNG           |  4 GNG
 VCC 5v        |  5 5v
 
 To start using only the ethernet module, you can configure the flags
-as follows in `my_config.h`:
+as follows in `Inc/my_config.h`:
 
     #define MY_CFG_UPRINTF_ENABLE 1L
     #define MY_CFG_DEBUG 0L
