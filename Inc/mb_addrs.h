@@ -32,42 +32,42 @@
 #define MB_TIME_ADQ_ADDR (MB_UPTIME_ADDR + 2)  // 0008 len 2
 #define MB_THER_ADDR     (MB_TIME_ADQ_ADDR + 2)    // 0010 len 1 * THERM_NUM
 /* 0087 - 0099 free */
-#define MB_PRESSURE      (MB_THER_ADDR + 100)  // 0100 len 2 only 17 bits  
-/* 0102 - 0109 free */
+#define MB_PRESSURE      (MB_THER_ADDR + 100)  // 0110 len 2 only 17 bits  
+/* 0112 - 0119 free */
 /* Events register on switches: */
-#define MB_SWITCH0_ON    (MB_THER_ADDR + 110)  // 0110 len 2
-#define MB_SWITCH0_OFF   (MB_SWITCH0_ON  + 2)  // 0112 len 2
-#define MB_SWITCH1_ON    (MB_SWITCH0_OFF + 2)  // 0114 len 2
-#define MB_SWITCH1_OFF   (MB_SWITCH1_ON  + 2)  // 0116 len 2
-#define MB_SWITCH2_ON    (MB_SWITCH1_OFF + 2)  // 0118 len 2
-#define MB_SWITCH2_OFF   (MB_SWITCH2_ON  + 2)  // 0120 len 2
-#define MB_SWITCH3_ON    (MB_SWITCH2_OFF + 2)  // 0122 len 2
-#define MB_SWITCH3_OFF   (MB_SWITCH3_ON  + 2)  // 0124 len 2
-#define MB_SWITCH4_ON    (MB_SWITCH3_OFF + 2)  // 0126 len 2
-#define MB_SWITCH4_OFF   (MB_SWITCH4_ON  + 2)  // 0128 len 2
-#define MB_SWITCH5_ON    (MB_SWITCH4_OFF + 2)  // 0130 len 2
-#define MB_SWITCH5_OFF   (MB_SWITCH5_ON  + 2)  // 0132 len 2
-#define MB_SWITCH6_ON    (MB_SWITCH5_OFF + 2)  // 0134 len 2
-#define MB_SWITCH6_OFF   (MB_SWITCH6_ON  + 2)  // 0136 len 2
-#define MB_SWITCH7_ON    (MB_SWITCH6_OFF + 2)  // 0138 len 2
-#define MB_SWITCH7_OFF   (MB_SWITCH7_ON  + 2)  // 0140 len 2
-#define MB_SWITCH8_ON    (MB_SWITCH7_OFF + 2)  // 0142 len 2
-#define MB_SWITCH8_OFF   (MB_SWITCH8_ON  + 2)  // 0144 len 2
-#define MB_SWITCH9_ON    (MB_SWITCH8_OFF + 2)  // 0146 len 2
-#define MB_SWITCH9_OFF   (MB_SWITCH9_ON  + 2)  // 0148 len 2
-#define MB_SWITCH10_ON   (MB_SWITCH9_OFF + 2)  // 0150 len 2
-#define MB_SWITCH10_OFF  (MB_SWITCH10_ON  + 2) // 0152 len 2
-#define MB_SWITCH11_ON   (MB_SWITCH10_OFF + 2) // 0154 len 2
-#define MB_SWITCH11_OFF  (MB_SWITCH11_ON  + 2) // 0156 len 2
-#define MB_SWITCH12_ON   (MB_SWITCH11_OFF + 2) // 0158 len 2
-#define MB_SWITCH12_OFF  (MB_SWITCH12_ON  + 2) // 0160 len 2
-#define MB_SWITCH13_ON   (MB_SWITCH12_OFF + 2) // 0162 len 2
-#define MB_SWITCH13_OFF  (MB_SWITCH13_ON  + 2) // 0164 len 2
-#define MB_SWITCH14_ON   (MB_SWITCH13_OFF + 2) // 0166 len 2
-#define MB_SWITCH14_OFF  (MB_SWITCH14_ON  + 2) // 0168 len 2
-#define MB_SWITCH15_ON   (MB_SWITCH14_OFF + 2) // 0170 len 2
-#define MB_SWITCH15_OFF  (MB_SWITCH15_ON  + 2) // 0172 len 2
-/* 0173 - 0199 free */
+#define MB_SWITCH0_ON    (MB_THER_ADDR + 110)  // 0120 len 2
+#define MB_SWITCH0_OFF   (MB_SWITCH0_ON  + 2)  // 0122 len 2
+#define MB_SWITCH1_ON    (MB_SWITCH0_OFF + 2)  // 0124 len 2
+#define MB_SWITCH1_OFF   (MB_SWITCH1_ON  + 2)  // 0126 len 2
+#define MB_SWITCH2_ON    (MB_SWITCH1_OFF + 2)  // 0128 len 2
+#define MB_SWITCH2_OFF   (MB_SWITCH2_ON  + 2)  // 0130 len 2
+#define MB_SWITCH3_ON    (MB_SWITCH2_OFF + 2)  // 0132 len 2
+#define MB_SWITCH3_OFF   (MB_SWITCH3_ON  + 2)  // 0134 len 2
+#define MB_SWITCH4_ON    (MB_SWITCH3_OFF + 2)  // 0136 len 2
+#define MB_SWITCH4_OFF   (MB_SWITCH4_ON  + 2)  // 0138 len 2
+#define MB_SWITCH5_ON    (MB_SWITCH4_OFF + 2)  // 0140 len 2
+#define MB_SWITCH5_OFF   (MB_SWITCH5_ON  + 2)  // 0142 len 2
+#define MB_SWITCH6_ON    (MB_SWITCH5_OFF + 2)  // 0144 len 2
+#define MB_SWITCH6_OFF   (MB_SWITCH6_ON  + 2)  // 0146 len 2
+#define MB_SWITCH7_ON    (MB_SWITCH6_OFF + 2)  // 0148 len 2
+#define MB_SWITCH7_OFF   (MB_SWITCH7_ON  + 2)  // 0150 len 2
+#define MB_SWITCH8_ON    (MB_SWITCH7_OFF + 2)  // 0152 len 2
+#define MB_SWITCH8_OFF   (MB_SWITCH8_ON  + 2)  // 0154 len 2
+#define MB_SWITCH9_ON    (MB_SWITCH8_OFF + 2)  // 0156 len 2
+#define MB_SWITCH9_OFF   (MB_SWITCH9_ON  + 2)  // 0158 len 2
+#define MB_SWITCH10_ON   (MB_SWITCH9_OFF + 2)  // 0160 len 2
+#define MB_SWITCH10_OFF  (MB_SWITCH10_ON  + 2) // 0162 len 2
+#define MB_SWITCH11_ON   (MB_SWITCH10_OFF + 2) // 0164 len 2
+#define MB_SWITCH11_OFF  (MB_SWITCH11_ON  + 2) // 0166 len 2
+#define MB_SWITCH12_ON   (MB_SWITCH11_OFF + 2) // 0168 len 2
+#define MB_SWITCH12_OFF  (MB_SWITCH12_ON  + 2) // 0170 len 2
+#define MB_SWITCH13_ON   (MB_SWITCH12_OFF + 2) // 0172 len 2
+#define MB_SWITCH13_OFF  (MB_SWITCH13_ON  + 2) // 0174 len 2
+#define MB_SWITCH14_ON   (MB_SWITCH13_OFF + 2) // 0176 len 2
+#define MB_SWITCH14_OFF  (MB_SWITCH14_ON  + 2) // 0178 len 2
+#define MB_SWITCH15_ON   (MB_SWITCH14_OFF + 2) // 0180 len 2
+#define MB_SWITCH15_OFF  (MB_SWITCH15_ON  + 2) // 0182 len 2
+/* 0183 - 0199 free */
 #define MB_ID_TABLE      (MB_THER_ADDR + 200)  // 0200 len 1 * THERM_NUM
 /* 0277 - 0300 free */
 
