@@ -39,7 +39,7 @@ A configuration interface is implemented by _telnet_ to port 500.
 
 ## Quick Star:
 
-Only need _Blue Pill_ and _W5500_ module. Connect the power of both boards and then link them as follows:
+You only need the _Blue Pill_ and _W5500_ module and connect them as follows:
 
 Blue Pill | W5500 Board
 ----------|------
