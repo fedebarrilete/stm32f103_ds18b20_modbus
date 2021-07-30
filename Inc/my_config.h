@@ -37,10 +37,10 @@
 			    * MAC_MAGIC_PRJ, ...} */
 
 #define VERSION    0
-#define SUBVERSION 5
+#define SUBVERSION 6
 
 
-#define MY_CFG_UPRINTF_ENABLE 1L
+#define MY_CFG_UPRINTF_ENABLE 0L
 #define UPRINTF_BUFFER_SIZE 160
 /* MY_CFG_UPRINTF_USE_TO:
    0: disable
@@ -64,12 +64,14 @@
 #define MY_CFG_NTP_ENABLE       1L 
 #define MY_CFG_RTC_ENABLE       0L /* FIXME: make long test in disable state. */
 #define MY_CFG_DNS_ENABLE       0L /* It is not convenient to enable it. */
-#define MY_CFG_LCD_ENABLE       0L 
+#define MY_CFG_LCD_ENABLE       0L /* Size ~ 4.6K */ 
 #define MY_CFG_18B20_ENABLE     0L 
 #define MY_CFG_ENCODER_ENABLE   0L /* Specify the type of encoder in
 				    * encoder_sw.h */
 #define MY_CFG_BAROMETER_ENABLE 0L /* BMP 180 */
+#define MY_CFG_DHT_ENABLE       0L /* DHT (Humidity-Temperature) sensors */
 #define MY_CFG_MODBUS_ENABLE    1L
+#define MY_CFG_MENUCFG_ENABLE   1L /* size ~ 6.5K */ 
 
 #if MY_CFG_ENCODER_ENABLE
 #  define ENC_TYPE_HW40_30P 1L
@@ -96,7 +98,9 @@
 		MY_CFG_ENCODER_ENABLE  <<12|		\
 		MY_CFG_BAROMETER_ENABLE<<13|		\
 		MY_CFG_RTC_ENABLE      <<14|		\
-		MY_CFG_MODBUS_ENABLE   <<15             )
+		MY_CFG_MODBUS_ENABLE   <<15|		\
+		MY_CFG_MENUCFG_ENABLE  <<16|		\
+		MY_CFG_DHT_ENABLE      <<17             )
 
 /* MY_CFG_LCD_SPI: Usa SPI para comnicarse con un 74HC595 y controlar
    el display, el bit1 controla el LED de estado. No se usa CS, sino
@@ -143,11 +147,11 @@
 #define LED1_TOGGLE  HAL_GPIO_TogglePin(LCD_LATCH_GPIO_Port, LCD_LATCH_Pin)	
 #endif
 
-/*
-#define LED1_ON      HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET)
-#define LED1_OFF     HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET)
-#define LED1_TOGGLE  HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin)
-*/
+
+#define DBG_ON      HAL_GPIO_WritePin (DBG_GPIO_Port, DBG_Pin, GPIO_PIN_SET)
+#define DBG_OFF     HAL_GPIO_WritePin (DBG_GPIO_Port, DBG_Pin, GPIO_PIN_RESET)
+#define DBG_TOGGLE  HAL_GPIO_TogglePin(DBG_GPIO_Port, DBG_Pin)
+
 
 #define BUZZER_ON   HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET)
 #define BUZZER_OFF  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET)
@@ -202,8 +206,9 @@ typedef struct _my_conf {
 #define ST_TH_SCAN     0x0020
 #define ST_LOOP_ERR    0x0100
 #define ST_OW_ERR      0x0200
-//#define ST_ERR (ST_NTP_FAIL|ST_LOOP_ERR|ST_OW_ERR)
-#define ST_ERR (ST_NTP_FAIL|ST_OW_ERR)
+#define ST_DHT_ERR     0x0400
+#define ST_ERR (ST_NTP_FAIL|ST_LOOP_ERR|ST_OW_ERR|ST_DHT_ERR)
+//#define ST_ERR (ST_NTP_FAIL|ST_OW_ERR)
 
 extern volatile uint32_t sec_ticks;
 extern volatile uint32_t day_ticks;
@@ -230,6 +235,13 @@ extern uint32_t door_sw_close_time;
 #if MY_CFG_BAROMETER_ENABLE
 extern uint32_t pressure; /* calculated pressure in Pa */
 #endif
+
+/* DHT22 Higrometer: */
+#if MY_CFG_DHT_ENABLE
+extern uint32_t dht_humidity;
+extern int32_t dht_temperature;
+#endif
+
 
 /* modbus digital i/o: */
 #if MY_CFG_MODBUS_ENABLE
