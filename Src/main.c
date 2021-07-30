@@ -215,7 +215,7 @@ static void leds_run(void)
 		}
 	} else {
 		if (count % 30 == 0) {
-			//LED1_TOGGLE;
+			LED1_TOGGLE;
 			LED0_TOGGLE;
 		}
 	}
