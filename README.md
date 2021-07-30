@@ -66,7 +66,9 @@ as follows in `Inc/my_config.h`:
     #define MY_CFG_ENCODER_ENABLE   0L /* Specify the type of encoder in
     				    * encoder_sw.h */
     #define MY_CFG_BAROMETER_ENABLE 0L /* BMP 180 */
+    #define MY_CFG_DHT_ENABLE       0L /* DHT (Humidity-Temperature) sensors */
     #define MY_CFG_MODBUS_ENABLE    1L
+    #define MY_CFG_MENUCFG_ENABLE   1L /* size ~ 6.5K */ 
 
 If you decide to enable the RTC, you need to power the VBAT pin. 
 
