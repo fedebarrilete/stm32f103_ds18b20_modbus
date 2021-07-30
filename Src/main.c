@@ -53,7 +53,6 @@ echo $(( 0x$(printf c%47s | nc -uw1 ntp.aggo-conicet.gob.ar 123|xxd -s40 -l4 -p)
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -65,14 +64,17 @@ echo $(( 0x$(printf c%47s | nc -uw1 ntp.aggo-conicet.gob.ar 123|xxd -s40 -l4 -p)
 #include "my_tcp.h"
 #include "my_rtc_time.h"
 #include "huart_tools.h"
+
 #if MY_CFG_18B20_ENABLE
 #include "my_ds18b20.h"
 #include "ds18b20.h"
 #endif
+
 #include "cmd.h"
 #include "eeprom.h"
 #include "my_menu.h"
 #include "modbus.h"
+
 #if MY_CFG_LCD_ENABLE
 #include "lcd.h"
 #include "my_lcd.h"
@@ -81,20 +83,26 @@ echo $(( 0x$(printf c%47s | nc -uw1 ntp.aggo-conicet.gob.ar 123|xxd -s40 -l4 -p)
 #include "Ethernet/socket.h"
 #include "DHCP/dhcp.h"
 #include "DNS/dns.h"
+
 #ifndef MY_CFG_NTP_ENABLE
 # define MY_CFG_NTP_ENABLE  0L
 #endif
+
 #if MY_CFG_NTP_ENABLE		  
 #include "SNTP/sntp.h"
 #endif
+
 #if MY_CFG_ENCODER_ENABLE		  
 #include "encoder_sw.h"
 #endif
 
+#if MY_CFG_BAROMETER_ENABLE
 #include "bmp180.h"
+#endif
 
-
-//#include "usbd_cdc_if.h"
+#if MY_CFG_DHT_ENABLE
+#include "dht.h"
+#endif
 
 
 /* USER CODE END Includes */
@@ -159,6 +167,13 @@ uint16_t coil_register = 0;
 uint16_t dout_register;
 #endif
 
+#if MY_CFG_DHT_ENABLE
+DHT dht22;
+uint32_t dht_humidity;
+int32_t dht_temperature;
+#endif
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -184,11 +199,11 @@ void my_time_handler(void)
 }
 
 
-static void leds_run(uint32_t wait )
+static void leds_run(void)
 {
 	static uint32_t sec_on = 0;
 	static uint32_t count = 0;
-	if (wait == 4 ) {
+	if ( state & ST_IP_ASSIGNED ) {
 		if (sec_on != sec_ticks ) {
 			LED1_ON;
 			LED0_ON;
@@ -198,11 +213,14 @@ static void leds_run(uint32_t wait )
 			LED1_OFF;
 			LED0_OFF;
 		}
-	} else if (wait == 12) {
-		if (count % 10 == 0) LED1_TOGGLE;
+	} else {
+		if (count % 30 == 0) {
+			//LED1_TOGGLE;
+			LED0_TOGGLE;
+		}
 	}
 	count++;
-
+	
 	return;
 }
 	
@@ -253,18 +271,23 @@ static void main_ip_client_loop(void)
 #  endif
 			/* 18: UTC-03:0, 22: UTC */
 			SNTP_init(NTP_SOCKET, my_conf->ntp_ip, MY_TZ, ntp_data);
+			
 			uprintf(&huart1,"# [%ld] NTP server: %d.%d.%d.%d\r\n",
 				sec_ticks, my_conf->ntp_ip[0],
 				my_conf->ntp_ip[1], my_conf->ntp_ip[2],
 				my_conf->ntp_ip[3]);
+			
+			cicle_break = 1;
 			state |= ST_IP_ASSIGNED;
 		}
 #else
+		if ( !(state & ST_IP_ASSIGNED) ) cicle_break = 1;
 		state |= ST_IP_ASSIGNED;
 #endif
-	} else
+	} else {
+		cicle_break = 1;
 		state &= ~(ST_IP_ASSIGNED);
-
+	}
 	return;
 }
 
@@ -317,12 +340,29 @@ static void main_ntp_loop(void)
 #endif
 
 
-#if MY_CFG_ENCODER_ENABLE
+#if MY_CFG_ENCODER_ENABLE || MY_CFG_DHT_ENABLE
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+#if MY_CFG_ENCODER_ENABLE
 	if ( GPIO_Pin == enc.sw_pin ) {
 		enc_switch_callback(&enc);
 	}
+#endif
+#if MY_CFG_DHT_ENABLE
+	if(GPIO_Pin == dht22.pin) {
+		DHT_pin_change_callback(&dht22);
+	}
+#endif	
+	return;
+}
+#endif
+
+
+#if MY_CFG_DHT_ENABLE
+void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef * htim)
+{
+
+	if ( htim->Instance == DHT_timer->Instance ) DHT_timer_overflow ^= 1;
 
 	return;
 }
@@ -343,13 +383,14 @@ int main(void)
   uint32_t *id = (uint32_t *) UID_BASE;
   int i = 0;
   uint32_t tickstart;
-  uint32_t wait = 12;
+  const uint32_t wait = 4;
   uint32_t cicle_delta;
+#if MY_CFG_NTP_ENABLE
   uint32_t day_now = 0;
+#endif
   int8_t ret = 0;
   int rom_size = 0;
   int door_sw_open = -1;
-
 #if MY_CFG_LCD_ENABLE
   uint32_t switch_state = 0;
   int clear_pin = 0;  
@@ -364,14 +405,6 @@ int main(void)
 			    (uint8_t)id[2], (uint8_t)id[1], (uint8_t)id[0] },
 		  .dhcp = NETINFO_DHCP,
 		  //.dhcp = NETINFO_STATIC,
-/*
-  .ip = {192, 168, 22, 150},// IP
-  .sn = {255, 255, 255, 0}, // Net Mask
-  .gw = {192, 168, 22, 1},  // GW.
-  #if MY_CFG_DNS_ENABLE
-  .dns = {192, 168, 22, 1}, // DNS
-  #endif
-*/
 	  },
 	  /* ntp_name: Need MY_CFG_DNS_ENABLE: */
 #if MY_CFG_DNS_ENABLE
@@ -414,7 +447,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+#if 0 /* 0: disable all auto MX initialization. */
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -429,7 +462,47 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM3_Init();
   MX_I2C1_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
+#else
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_SPI1_Init();
+#if MY_CFG_UPRINTF_ENABLE
+  MX_USART1_UART_Init();
+#endif
+#if  MY_CFG_WDT_ENABLE
+  MX_IWDG_Init();
+#endif
+#if MY_CFG_RTC_ENABLE
+  MX_RTC_Init();
+#endif
+#if MY_CFG_18B20_ENABLE
+  MX_USART3_UART_Init();
+#endif
+#if MY_CFG_LCD_ENABLE
+  MX_SPI2_Init();
+#endif
+//  MX_ADC1_Init();
+#if MY_CFG_ENCODER_ENABLE
+  MX_TIM3_Init();
+#endif
+#if MY_CFG_BAROMETER_ENABLE
+  MX_I2C1_Init();
+#endif
+#if MY_CFG_DHT_ENABLE
+  MX_TIM4_Init();
+#endif
+#endif
+  
+  /* Test for 74HC595: */
+  /*
+  uint8_t coil_val[] = {0xff,0xff};
+  HAL_SPI_Transmit(&hspi2, coil_val, 2, 1);
+  HAL_GPIO_WritePin(LCD_LATCH_GPIO_Port, LCD_LATCH_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LCD_LATCH_GPIO_Port, LCD_LATCH_Pin, GPIO_PIN_SET);
+  */
+
   
   /* Hard Reset W5500 start: */
   HAL_GPIO_WritePin(W5500_RST_GPIO_Port, W5500_RST_Pin, GPIO_PIN_RESET);
@@ -444,11 +517,14 @@ int main(void)
 	  *((unsigned short *) FLASHSIZE_BASE), /* Flash in kB */
 	  id[0], id[1], id[2]);
   uprintf(&huart1,"# [%ld] ROM %d B\r\n", sec_ticks, rom_size << 2);
+  uprintf(&huart1,"# [%ld] CLK Freq: %ld Hz\r\n", sec_ticks,
+	  HAL_RCC_GetHCLKFreq() );
 #if MY_CFG_18B20_ENABLE
   my_18b20_init(&huart3);
 #endif
   
   /*## Check if the system has resumed from IWDG reset ##*/
+#if MY_CFG_WDT_ENABLE
   if(__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST) != RESET) {
 	  wdt_active = 1;
 	  /* Clear reset flags */
@@ -459,7 +535,8 @@ int main(void)
 	  /* IWDGRST flag is not set. */
 	  wdt_active = 0;
   }
-
+#endif
+  
   net_info_ee = &(my_conf->ni);
   
   if ( HAL_GPIO_ReadPin(Clear_GPIO_Port, Clear_Pin) == 0 ) {
@@ -519,24 +596,29 @@ int main(void)
   SNTP_set_TZ(MY_TZ);
 //#endif
 #if MY_CFG_LCD_ENABLE
-#if MY_CFG_LCD_I2C
+# if MY_CFG_LCD_I2C
   lcd_init_i2c (&hi2c1, LCD_ADDR);
-#endif
-#if MY_CFG_LCD_SPI
+# endif
+
+# if MY_CFG_LCD_SPI
   //lcd_init_spi(&hspi2, HC595_LATCH_GPIO_Port, HC595_LATCH_Pin);
   lcd_init_spi(&hspi2, LCD_LATCH_GPIO_Port, LCD_LATCH_Pin);
-#endif
+# endif
   lcd_light_set(1);
   my_lcd_set_time_out(my_conf->lcd_to);
 #endif
 
+#if MY_CFG_WDT_ENABLE
   uprintf(&huart1,"# [%ld] WDT: %d\r\n", sec_ticks, wdt_active );
+#endif
+
+#if MY_CFG_MENUCFG_ENABLE  
   set_prompt(TCP1_SOCKET, prompt_def);
   set_prompt(TCP2_SOCKET, prompt_def);
+#endif
 //  state |= ST_ADQ_ENABLE;
 
 #if MY_CFG_ENCODER_ENABLE
-  
   enc_init(&enc, &htim3,
 	   ENC_SW_GPIO_Port,
 	   ENC_SW_Pin
@@ -544,14 +626,20 @@ int main(void)
   enc_setup(&enc, 0, 1, 0, 1, 0, 0);
   //enc_setup_fc(&enc, 0, 100, 0, 1, 5, 1, 0, 0);
 #endif
+  
 #if MY_CFG_BAROMETER_ENABLE
   barometer = bmp180_init(&hi2c1, BMP180_ADDR, BMP180_CMD_PRESSURE3);
 #endif
+
+#if MY_CFG_DHT_ENABLE
+  DHT_init_timer(&htim4);
+  DHT_init(&dht22, DHT22_GPIO_Port, DHT22_Pin); 
+#endif
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  
   while (1) {
     /* USER CODE END WHILE */
 
@@ -596,12 +684,7 @@ int main(void)
 	  }
 #endif
 	  if ( !(state & ST_ERR) ) {
-		  if ( state & ST_IP_ASSIGNED ) {
-			  wait = 4;
-		  } else {
-			  wait = 12;
-		  }
-		  leds_run(wait);
+		  leds_run();
 #if MY_CFG_LCD_ENABLE
 		  if ( switch_state & 0x20 ) {
 			  switch_state &= ~0x20;
@@ -610,6 +693,7 @@ int main(void)
 #endif		  
 	  } else {
 		  LED1_ON;
+		  LED0_ON;		  
 #if MY_CFG_LCD_ENABLE
 		  if ( !(switch_state & 0x20) ) {
 			  switch_state = (0x20|0x04);
@@ -624,11 +708,15 @@ int main(void)
 	  if ( sec_ticks > 8 ) { /* W5500 need ~9 secs to start */
 		  main_ip_client_loop();
 	  }
-#if MY_CFG_NTP_ENABLE	
+#if MY_CFG_NTP_ENABLE
 	  if( (state & ST_IP_ASSIGNED)  && 
 	      (!(state & (ST_NTP_SET | ST_NTP_FAIL) ) ||
 	       (state & ST_NTP_GET) )     	           ) {
 		  main_ntp_loop();
+	  }
+	  if ( day_ticks != day_now ) {
+		  day_now = day_ticks;
+		  if ( MNC_NTP_ENABLE() ) state &= ~ST_NTP_SET;
 	  }
 #endif	       
 	  /* ALL: */
@@ -640,7 +728,21 @@ int main(void)
 			dout_register |= 0x01;
 	  if ( HAL_GPIO_ReadPin(Clear_GPIO_Port, Clear_Pin) == 0 )
 			dout_register |= 0x0100;
+
+
+	  /*
+	    coil_val[0] = ~ (coil_register);
+	    coil_val[1] = ~ (coil_register >> 8);
+	    HAL_SPI_Transmit(&hspi2, coil_val, 1, 1);
+	    HAL_GPIO_WritePin(LCD_LATCH_GPIO_Port, LCD_LATCH_Pin, GPIO_PIN_RESET);
+	    HAL_GPIO_WritePin(LCD_LATCH_GPIO_Port, LCD_LATCH_Pin, GPIO_PIN_SET);
+	    //HAL_GPIO_WritePin(HC595_LATCH_GPIO_Port, HC595_LATCH_Pin, GPIO_PIN_RESET);
+	    //HAL_GPIO_WritePin(HC595_LATCH_GPIO_Port, HC595_LATCH_Pin, GPIO_PIN_SET);
+	    */
+
+	  
 #endif
+
 	  /* Door monitor: */
 	  if ( HAL_GPIO_ReadPin(DOOR_SW_GPIO_Port, DOOR_SW_Pin) == 1
 	       //HAL_GPIO_ReadPin(Clear_GPIO_Port, Clear_Pin) == 0
@@ -667,8 +769,10 @@ int main(void)
 		  mb_run(TCP0_SOCKET, my_conf->mbport);
 		  mb_run(TCP7_SOCKET, my_conf->mbport);
 #endif
+#if MY_CFG_MENUCFG_ENABLE
 		  my_menu_p500_run(TCP1_SOCKET, my_conf->cfgport);
 		  my_menu_p500_run(TCP2_SOCKET, my_conf->cfgport);
+#endif
 	  }
 
 	  /* Thermometers loop: */
@@ -679,9 +783,9 @@ int main(void)
 	  } else if ( state & ST_TH_SCAN ) {
 		  my_18b20_scan();
 		  cicle_break = 1;
-		  wait = 12;
 	  }
 #endif
+	  
 	  /* LCD loop: */
 #if MY_CFG_LCD_ENABLE
 	  if ( sec_ticks == 14 ) {
@@ -692,20 +796,27 @@ int main(void)
 		  switch_state &= ~0x07;
 	  }
 #endif
+	  
 	  /* Barometer loop: */
 #if MY_CFG_BAROMETER_ENABLE
 	  if ( baro_loop(barometer) ) {
 		  pressure = (uint32_t) BMP180_GET_PRESSURE(barometer);
 	  }
 #endif
-	  if ( day_ticks != day_now ) {
-		  day_now = day_ticks;
-		  if ( MNC_NTP_ENABLE() ) state &= ~ST_NTP_SET;
+	  /* DHT22 (Hydrometer) loop: */
+#if MY_CFG_DHT_ENABLE
+	  if ( DHT_read_data(&dht22) == 0 ) {
+		  dht_humidity = dht22.humidity;
+		  dht_temperature = dht22.temperature;
+	  } else if (dht22.data_valid == 0 && dht_humidity) {
+		  dht_humidity = 0;
+		  dht_temperature = -85;
+		  state |= ST_DHT_ERR;
 	  }
-
-	  /* CHK loop integrity: */
+#endif
+	  /* CHK main loop integrity: */
 	  cicle_delta = HAL_GetTick() - tickstart;
-	  if ( cicle_delta > wait && wait == 4 ) {
+	  if ( cicle_delta > wait ) {
 		  if ( cicle_break ) {
 			  cicle_break = 0;
 		  } else {
@@ -715,7 +826,6 @@ int main(void)
 				  sec_ticks, cicle_delta);
 		  }
 	  }
-	    
 	  while ((HAL_GetTick() - tickstart) < wait);
 
   }

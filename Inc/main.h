@@ -64,8 +64,9 @@ void Error_Handler(void);
 #define Clear_GPIO_Port GPIOA
 #define W5500_CS_Pin GPIO_PIN_0
 #define W5500_CS_GPIO_Port GPIOB
-#define GPIO_PB1_Pin GPIO_PIN_1
-#define GPIO_PB1_GPIO_Port GPIOB
+#define DHT22_Pin GPIO_PIN_1
+#define DHT22_GPIO_Port GPIOB
+#define DHT22_EXTI_IRQn EXTI1_IRQn
 #define Boot1_Pin GPIO_PIN_2
 #define Boot1_GPIO_Port GPIOB
 #define LCD_LATCH_Pin GPIO_PIN_12
@@ -79,6 +80,8 @@ void Error_Handler(void);
 #define ENC_SW_Pin GPIO_PIN_15
 #define ENC_SW_GPIO_Port GPIOA
 #define ENC_SW_EXTI_IRQn EXTI15_10_IRQn
+#define DBG_Pin GPIO_PIN_3
+#define DBG_GPIO_Port GPIOB
 #define W25Q16_CS_Pin GPIO_PIN_8
 #define W25Q16_CS_GPIO_Port GPIOB
 #define W5500_RST_Pin GPIO_PIN_9

@@ -4,7 +4,7 @@
  *   @author Bareilles Federico fede@fcaglp.unlp.edu.ar>
  *   @date 26/01/2020
  * 
- *   @copyright (c) Copyright 2018 Federico Bareilles <fede@fcaglp.unlp.edu.ar>.
+ *   @copyright (c) Copyright 2020 Federico Bareilles <fede@fcaglp.unlp.edu.ar>.
  *
  *   This program is free software; you can redistribute it and/or
  *   modify it under the terms of the GNU General Public License as
@@ -186,6 +186,7 @@ int my_RTC_Init(RTC_HandleTypeDef *hal_rtc)
 
 	return 0;
 }
+
 #else
 
 uint32_t _time_offset_uptime = 0;

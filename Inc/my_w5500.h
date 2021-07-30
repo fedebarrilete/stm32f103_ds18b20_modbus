@@ -32,7 +32,7 @@ extern volatile uint8_t new_ip_assigned;
 
 int my_w5500_init(SPI_HandleTypeDef *hspi, wiz_NetInfo *net_info);
 void my_w5500_set_loggin_uart(UART_HandleTypeDef *u);
-void print_net_data(wiz_NetInfo *net_info);
+//void print_net_data(wiz_NetInfo *net_info);
 int my_dhcp_run(void);
 
 #endif /* _MY_W5500_H */

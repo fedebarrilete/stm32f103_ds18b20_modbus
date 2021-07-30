@@ -51,16 +51,13 @@ void enc_init(ENCODERROT *_rot,  TIM_HandleTypeDef *htim,
 
 static int _get_raw(ENCODERROT *_rot)
 {
-	if ( _rot->htim->Instance == TIM3) {
 #if ENC_TYPE_EN11_20P
-		return TIM3->CNT >> 1;
+	return __HAL_TIM_GET_COUNTER(_rot->htim) >> 1;
 #elif ENC_TYPE_HW40_30P
-		return TIM3->CNT;
+	return __HAL_TIM_GET_COUNTER(_rot->htim);
 #else
-		return TIM3->CNT;
+	return __HAL_TIM_GET_COUNTER(_rot->htim);
 #endif
-	} else
-		return -1;
 }
 
 

@@ -24,6 +24,7 @@
 #include <time.h>
 
 #include "my_config.h"
+#if MY_CFG_LCD_ENABLE
 #include "my_rtc_time.h"
 #include "my_ds18b20.h"
 #include "lcd.h"
@@ -31,8 +32,6 @@
 #if MY_CFG_ENCODER_ENABLE		  
 #include "encoder_sw.h"
 #endif
-
-#if MY_CFG_LCD_ENABLE
 
 enum { /* LCD Page: */
 	LCDP_MAC = 0,
@@ -52,12 +51,15 @@ enum { /* LCD Page: */
 #if MY_CFG_BAROMETER_ENABLE
 	LCDP_PRESS,
 #endif
+#if MY_CFG_DHT_ENABLE
+	LCDP_HUMIDITY,
+#endif
 	LCDP_ST,
 	LCDP_NUM /* it is not a page. */
 };
 
 
-#if MY_CFG_18B20_ENABLE || MY_CFG_BAROMETER_ENABLE
+#if MY_CFG_18B20_ENABLE || MY_CFG_BAROMETER_ENABLE || MY_CFG_DHT_ENABLE
 static uint8_t int_to_str(uint8_t *str, uint16_t val, uint8_t digits)
 {
 	int i = 0;
@@ -126,7 +128,7 @@ static int my_lcd_page(int page)
 	static int pege_curr = -1;
 	static char lcd_buff[17]={0};
 	static datetime *dt;
-#if MY_CFG_18B20_ENABLE || MY_CFG_BAROMETER_ENABLE
+#if MY_CFG_18B20_ENABLE || MY_CFG_BAROMETER_ENABLE || MY_CFG_DHT_ENABLE
 	int len;
 #endif
 #if MY_CFG_18B20_ENABLE
@@ -375,6 +377,64 @@ static int my_lcd_page(int page)
 		}	
 		break;
 #endif
+
+
+#if MY_CFG_DHT_ENABLE
+	case LCDP_HUMIDITY:
+		switch(lcd_step) {
+		case 0: lcd_clear();
+			break;	
+		case 1: lcd_put_cur(0, 0);
+			break;
+		case 2:
+			sprintf(lcd_buff,"H: --.- %%");
+			lcd_send_string(lcd_buff);
+			break;
+
+		case 3: lcd_put_cur(1, 0);
+			break;
+		case 4:
+			sprintf(lcd_buff,"T: ---.- C");
+			lcd_send_string(lcd_buff);
+			break;
+		case 5: lcd_put_cur(0, 3);
+			break;
+		case 6:
+			if ( dht_humidity ) {
+				len = float_to_str((uint8_t *)lcd_buff,
+						   (float) dht_humidity/10.0, 4,1);
+				*((uint8_t *)lcd_buff+len) = 0;
+			} else {
+				sprintf(lcd_buff,"--.-");
+			}
+			lcd_send_string(lcd_buff);
+			break;
+
+		case 7: lcd_put_cur(1, 3);
+			break;
+		case 8:
+			if ( dht_temperature != -85 ) {
+				len = float_to_str((uint8_t *)lcd_buff,
+						   (float) dht_temperature/10.0, 5,1);
+				*((uint8_t *)lcd_buff+len) = 0;
+
+			} else {
+				sprintf(lcd_buff,"---.-");
+			}
+			lcd_send_string(lcd_buff);
+			
+			break;
+
+
+			
+		default:
+			lcd_step = 4;
+			break;
+		}	
+		break;
+#endif
+
+		
 	case LCDP_ST:
 		switch(lcd_step) {
 		case 0: lcd_clear();
@@ -546,8 +606,6 @@ int my_lcd_run(int flag)
 #if MY_CFG_ENCODER_ENABLE
 	static int cur_enc_val = 0;
 #endif
-	//static int br_pwm = 0; /* and enc_setup(&enc, 0, 4, 4, 1, 0, 0); */
-
 	if ( flag == 1 && count != lcd_to) {
 		show++;
 		if ( show == LCDP_NUM ) show = LCDP_MAC;
@@ -556,7 +614,6 @@ int my_lcd_run(int flag)
 		else show = LCDP_NUM - 1;
 	} else if ( flag == 4 ) { /* on err. */
 		show = LCDP_ST;
-		//lcd_to = 0;		
 	} else if ( flag == 8  && show == LCDP_IP) {
 		show = LCDP_TIME;
 	}
@@ -571,16 +628,7 @@ int my_lcd_run(int flag)
 				lcd_light_set(0);
 		}
 	} else count = 1;
-	
-#if 0
-	if ( br_pwm >= 0 &&  br_pwm <enc_get_current(&enc))
-		lcd_light_set(1);
-	else
-		lcd_light_set(0);
-	br_pwm++;
-	if ( br_pwm == 4 ) br_pwm = 0;
-#endif	
-	
+		
 #if MY_CFG_ENCODER_ENABLE
 	if ( cur_enc_val != enc_get_current(&enc) ) {
 		if ( count == lcd_to ) {
@@ -592,15 +640,12 @@ int my_lcd_run(int flag)
 		count = 0;
 	}
 #endif
-	
 	if ( show == LCDP_MAC &&
 	     state & ST_IP_ASSIGNED ) {
 		show = LCDP_IP;
 	} else if (show == LCDP_IP && !(state & ST_IP_ASSIGNED) ) {
 		show++;
 	}
-	
-	
 	
 	if ( !lcd_run() )
 		my_lcd_page(show);

@@ -4,7 +4,7 @@
  *   @author Bareilles Federico fede@fcaglp.unlp.edu.ar>
  *   @date 27/01/2020
  * 
- *   @copyright (c) Copyright 2018 Federico Bareilles <fede@fcaglp.unlp.edu.ar>.
+ *   @copyright (c) Copyright 2020 Federico Bareilles <fede@fcaglp.unlp.edu.ar>.
  *
  *   This program is free software; you can redistribute it and/or
  *   modify it under the terms of the GNU General Public License as

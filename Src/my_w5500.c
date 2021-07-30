@@ -33,7 +33,7 @@
 #include "huart_tools.h"
 #include "cmd.h" 
 
-static  SPI_HandleTypeDef *_w5500_spi = NULL;
+static SPI_HandleTypeDef *_w5500_spi = NULL;
 static wiz_NetInfo *_net_info = NULL;
 static UART_HandleTypeDef *_con = NULL; /* Loggin console */
 
@@ -47,8 +47,7 @@ static uint8_t dns_buffer[MAX_DNS_BUF_SIZE];
 static uint8_t ip_dns[4];
 #endif
 
-	
-			       
+				       
 void my_w5500_set_loggin_uart(UART_HandleTypeDef *u)
 {
 	_con = u;
@@ -99,6 +98,20 @@ void Callback_IPConflict(void) {
 }
 
 
+static void print_net_data(wiz_NetInfo *n_i)
+{
+	uprintf(_con,"# [%ld] DHCP:%s\r\n# \tIP:  %d.%d.%d.%d\r\n# \tGW:  %d.%d.%d.%d\r\n# \tMask:%d.%d.%d.%d\r\n# \tDNS: %d.%d.%d.%d\r\n", sec_ticks,
+		n_i->dhcp== 1?"STATIC":"DINAMIC",
+		n_i->ip[0], n_i->ip[1], n_i->ip[2], n_i->ip[3],
+		n_i->gw[0], n_i->gw[1], n_i->gw[2], n_i->gw[3],
+		n_i->sn[0], n_i->sn[1], n_i->sn[2], n_i->sn[3],
+		n_i->dns[0],n_i->dns[1],n_i->dns[2],n_i->dns[3]
+		);
+	
+	return;
+}
+
+
 int my_w5500_init(SPI_HandleTypeDef *hspi, wiz_NetInfo *net_info)
 {
 	int ret = -1;
@@ -140,6 +153,7 @@ int my_w5500_init(SPI_HandleTypeDef *hspi, wiz_NetInfo *net_info)
 	} else {
 		wizchip_setnetinfo(_net_info);
 	}
+
 	uprintf(_con,"# [%ld] MAC: %02x:%02x:%02x:%02x:%02x:%02x\r\n",
 		sec_ticks,
 		_net_info->mac[0],_net_info->mac[1],_net_info->mac[2],
@@ -147,27 +161,13 @@ int my_w5500_init(SPI_HandleTypeDef *hspi, wiz_NetInfo *net_info)
 
 	if ( _net_info->dhcp != NETINFO_DHCP ) 
 		print_net_data(_net_info);
-	
+
 #if MY_CFG_DNS_ENABLE
 	DNS_init(DNS_SOCKET, dns_buffer);
 	if ( _net_info->dhcp == NETINFO_DHCP )
 		getDNSfromDHCP(ip_dns);
 #endif
 	return 0;	
-}
-
-
-void print_net_data(wiz_NetInfo *n_i)
-{
-	uprintf(_con,"# [%ld] DHCP:%s\r\n# \tIP:  %d.%d.%d.%d\r\n# \tGW:  %d.%d.%d.%d\r\n# \tMask:%d.%d.%d.%d\r\n# \tDNS: %d.%d.%d.%d\r\n", sec_ticks,
-		n_i->dhcp== 1?"STATIC":"DINAMIC",
-		n_i->ip[0], n_i->ip[1], n_i->ip[2], n_i->ip[3],
-		n_i->gw[0], n_i->gw[1], n_i->gw[2], n_i->gw[3],
-		n_i->sn[0], n_i->sn[1], n_i->sn[2], n_i->sn[3],
-		n_i->dns[0],n_i->dns[1],n_i->dns[2],n_i->dns[3]
-		);
-	
-	return;
 }
 
 
@@ -223,6 +223,7 @@ int my_dhcp_run(void)
 
 		printf("# dhcp: LEASED  \r\n");
 		print_net_data(_net_info);
+
 		
 	}
 

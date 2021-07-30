@@ -153,6 +153,18 @@ static int mb_f4(uint8_t sn)
 		addr += 2;	
 	}
 #endif
+#if MY_CFG_DHT_ENABLE
+	if ( addr == MB_HUMIDITY && addr < addr_to ) {
+		*((int16_t *) bop) = SWAP16(dht_humidity);
+		bop += 2;
+		addr += 1;
+	}
+	if ( addr == MB_H_TEMPERATURE && addr < addr_to ) {
+		*((int16_t *) bop) = SWAP16(dht_temperature);
+		bop += 2;
+		addr += 1;
+	}
+#endif
        	if ( addr >= MB_SWITCH0_ON && addr < addr_to &&
 		    addr + MBAP_NUM_REG(mb) <= MB_SWITCH15_OFF + 2 ) {
 		while ( addr < (MBAP_ADDR(mb) + MBAP_NUM_REG(mb)) ) {

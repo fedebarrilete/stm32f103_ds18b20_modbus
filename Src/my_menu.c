@@ -19,6 +19,7 @@
 
 
 #include "my_config.h"
+#if MY_CFG_MENUCFG_ENABLE
 #include "main.h"
 #include "usart.h"
 
@@ -746,14 +747,13 @@ static int com_list_th(uint8_t sn, void *arg)
 	THER18B20DATA *thd = my_18b20_get_data_p();
 	uint8_t *idt =  my_18b20_get_id_table();
 	int num_th = my_18b20_get_number();
+	int len;
 	
 	sprintf(msg, "Current Temperatures:\r\n");
 	send(sn, (uint8_t*)msg, strlen(msg) );
 	cicle_break = 1; /* FIXME */
 	for (int id = 0; id < num_th; id++) {
 		int id_name = idt[id];
-		int len;
-		
 		len = sprintf(msg,"ID: [%02x][%02d] -> ", MNC_GET_ID(),id_name);
 		if (thd[id_name].valid ) {
 			len += sprintf(msg+len, "%03d",
@@ -794,7 +794,20 @@ static int com_list_th(uint8_t sn, void *arg)
 		send(sn, (uint8_t*)msg, strlen(msg) );	
 	}
 #  endif
-	
+#  if MY_CFG_DHT_ENABLE
+	if (  dht_humidity != 0 ) {
+		len = sprintf(msg,"ID: [%02x] humidity -> %3ld  %%, ",
+			      MNC_GET_ID(), dht_humidity);
+		*(msg+len-4)   = *(msg+len-5);
+		*(msg+len-5) = *(msg+len-6);
+		*(msg+len-6) = '.';
+		len += 	sprintf(msg+len, "T -> %4ld \r\n", dht_temperature);
+		*(msg+len-2)   = *(msg+len-3);
+		*(msg+len-3) = *(msg+len-4);
+		*(msg+len-4) = '.';
+		send(sn, (uint8_t*)msg, strlen(msg) );	
+	}
+#  endif
 	return CMD_OK;
 }
 #endif
@@ -813,8 +826,6 @@ static int com_rtccr(uint8_t sn, void *arg)
 	   STM32 ID: 66dff55 54526750 87252339     32766    33    81.65
 	   STM32 ID: 46f78dc 18003129 160707e2     32766    32    78.74
 	   STM32 ID: 671ff52 49558250 87120839  (Bad RTC)
-
-
 	*/
 	bkpccr = READ_REG(BKP->RTCCR);
 	if ( *((char *) arg) == 0 ) {
@@ -960,8 +971,13 @@ static int com_reboot(uint8_t sn, void *arg)
 
 static int com_wdt(uint8_t sn, void *arg)
 {
+#if MY_CFG_WDT_ENABLE
 	sprintf(msg, "WDT count: %u, reboot on wdt event: %u\r\n",
 		wdt_get_counter(), wdt_active );
+#else
+	sprintf(msg, "WDT count: %u. WARNING: WDT disable in firmware.\r\n",
+		wdt_get_counter());
+#endif
 	send(sn, (uint8_t*)msg, strlen(msg) );
 	
 	return CMD_OK;
@@ -972,11 +988,11 @@ static int com_status(uint8_t sn, void *arg)
 {
 	uint32_t len = 0;
 	
-	len=sprintf(msg+len, "IP assigned: %d, NTP set: %d, NTP FAIL: %d, Loop err: %d, OW err: %d\r\n",
-		    (state&ST_IP_ASSIGNED)?1:0,
+	len=sprintf(msg+len, "NTP set: %d, NTP FAIL: %d, Loop err: %d, OW err: %d, DHT err: %d\r\n",
 		    (state&ST_NTP_SET)?1:0, (state&ST_NTP_FAIL)?1:0,
 		    (state&ST_LOOP_ERR)?1:0,
-		    (state&ST_OW_ERR)?1:0
+		    (state&ST_OW_ERR)?1:0,
+		    (state&ST_DHT_ERR)?1:0
 		);
 	send(sn, (uint8_t*)msg, strlen(msg) );
 	
@@ -1002,8 +1018,8 @@ static int com_version(uint8_t sn, void *arg)
 		     net_info_ee->mac[2], net_info_ee->mac[3],
 		     net_info_ee->mac[4], net_info_ee->mac[5]);
 	i += sprintf(msg+i, "FW v: %1d.%1d\r\n", VERSION, SUBVERSION);
-	i += sprintf(msg+i, "Conf. id: 0x%04lx -> 0b", MY_CFG_SERIAL_ID);
-	for(int j = 15; j > -1; j--)
+	i += sprintf(msg+i, "Conf. id: 0x%08lx -> 0b", MY_CFG_SERIAL_ID);
+	for(int j = 23; j > -1; j--) /* Max 31 */
 		i += sprintf(msg+i, "%01d",
 			     (uint8_t) (MY_CFG_SERIAL_ID >> j) & 0x01);
 	i += sprintf(msg+i,"\r\n");
@@ -1119,4 +1135,4 @@ int my_menu_p500_run(uint8_t sn, int port)
 	return ret;
 }
 
-
+#endif /* MY_CFG_MENUCFG_ENABLE */

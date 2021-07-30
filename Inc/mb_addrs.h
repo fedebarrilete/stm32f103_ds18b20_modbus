@@ -32,8 +32,10 @@
 #define MB_TIME_ADQ_ADDR (MB_UPTIME_ADDR + 2)  // 0008 len 2
 #define MB_THER_ADDR     (MB_TIME_ADQ_ADDR + 2)    // 0010 len 1 * THERM_NUM
 /* 0087 - 0099 free */
-#define MB_PRESSURE      (MB_THER_ADDR + 100)  // 0110 len 2 only 17 bits  
-/* 0112 - 0119 free */
+#define MB_PRESSURE      (MB_THER_ADDR + 100)  // 0110 len 2 only 17 bits
+#define MB_HUMIDITY      (MB_PRESSURE    + 2)  // 0112 len 1
+#define MB_H_TEMPERATURE (MB_HUMIDITY    + 1)  // 0113 len 1
+/* 0114 - 0119 free */
 /* Events register on switches: */
 #define MB_SWITCH0_ON    (MB_THER_ADDR + 110)  // 0120 len 2
 #define MB_SWITCH0_OFF   (MB_SWITCH0_ON  + 2)  // 0122 len 2

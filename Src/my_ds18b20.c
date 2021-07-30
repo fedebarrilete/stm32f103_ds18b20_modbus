@@ -16,6 +16,9 @@
  *   that it may be useful for others.
  *
  *   29/02/2020: Created.
+ * 
+ *   OneWire reference:
+ *   https://www.maximintegrated.com/en/design/technical-documents/tutorials/1/148.html
  **/
 
  /*
@@ -481,107 +484,5 @@ void my_18b20_scan(void)
 	
 	return;
 }
-
-
-
-#if 0
-void my_18b20_scan(uint16_t sn)
-{
-	//static uint32_t cicle = 0;
-	static uint8_t ROMBuffer[8]= {0,};
-	int count = 0;
-	static int rom_count = 0;
-	static uint64_t *romp = (uint64_t *) ROMBuffer;
-	static uint64_t	rom_old = 0L;
-	static uint64_t *th_rom;
-	int id;
-
-	//if ( cicle++ < 10 ) return;
-	//cicle = 0;
-
-	OneWire_Execute(0x33, ROMBuffer, 0, NULL);
-	//LED0_ON;
-	while(!OneWire_complete() && count++ < 25000);
-	//LED0_OFF;
-	if ( count < 25000 && crc8(ROMBuffer, 7) == ROMBuffer[7] ) {
-		if ( *romp != rom_old ) {
-			rom_count = 0;
-			rom_old = *romp;
-		}
-		if ( rom_count == 10 ) {
-			int len;
-			for (id = 0; id < THERM_NUM && th.rom[id][0]; id++) {
-				th_rom =  (uint64_t *) th.rom[id];
-				if ( *th_rom == *romp ) {
-					break;
-					  
-				}
-			}
-			if ( th.rom[id][0] == 0 && id < THERM_NUM ) {
-				th_rom =  (uint64_t *) th.rom[id];
-				*th_rom = *romp;
-			} else if ( th.rom[id][0] == 0xff && id <= THERM_NUM ) {
-				for (id = 0; id < THERM_NUM && th.rom[id][0] != 0xff; id++) {
-					th_rom =  (uint64_t *) th.rom[id];
-					if ( *th_rom == *romp ) {
-						break;
-						
-					}
-					
-				}
-				if ( th.rom[id][0] == 0xff && id < THERM_NUM ) {
-					th_rom =  (uint64_t *) th.rom[id];
-					*th_rom = *romp;
-				}
-			}
-			len = sprintf(msg,"\rID: [%02d] ", id);
-			for(int i=0;i<8;i++)
-				len+=sprintf(msg+len,"0x%02x, ", ROMBuffer[i] );
-			sprintf(msg+len,"\r\n");
-			send(sn, (uint8_t*)msg, strlen(msg) );
-		} 
-		rom_count++;
-
-	} else {
-		rom_old = 0L;
-		HAL_Delay(500);
-		
-	}
-	
-	return;
-}
-#endif 
-
-
-/****************************************************************************
-
-      SCRATCH:
-*/
-
-#if 0
-  int j;
-  uint8_t *ap;
-  uint64_t *rom;
-  printf("\r\n");
-  for(j=0;j<15;j++) {
-	  rom = (uint64_t *) th.rom[j];
-	  printf("%2d: %08lx%08lx ", j, (uint32_t) (*rom>>32), (uint32_t) *rom);
-	  //for(i=0;i<8;i++)
-	  //	  printf("0x%02x, ", th.rom[j][i] );
-	  ap = (uint8_t *) &th.a[j];
-	  th.a[j].id = j;
-	  th.a[j].flag = 1;
-	  printf("%d [0x%02x]\r\n", (uint8_t) th.a[j].id,
-		 *ap );
-  }
-  printf("size: %d, round32: %d\r\n", sizeof(THER18B20ROM),
-	 (sizeof(THER18B20ROM)+3) >> 2 );
-
-  for(j=0;j<15;j++) {
-	  printf("%2d: up: %d\r\n", j, th.t.up[j]);
-  }
-  while (1);
-#endif
-
 
 #endif /* MY_CFG_18B20_ENABLE */

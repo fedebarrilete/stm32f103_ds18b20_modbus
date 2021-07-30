@@ -32,6 +32,7 @@ A configuration interface is implemented by _telnet_ to port 500.
  - Thermometers ds18b20 (via OneWire, driver implemented in hardware)
  - Rotary encoder with switch (via timer 3)
  - Barometer BMP180 (via I2C)
+ - Hygrometer AM2302/DHT22 (via propietary onewire protocol)
  - ModBus server (TCP)
  - Debugin
  - UART1 as a monitor
