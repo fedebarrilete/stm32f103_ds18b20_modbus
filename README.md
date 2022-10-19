@@ -93,7 +93,7 @@ Now you can use the configuration interface via _telnet_:
 
 The modbus protocol does not depend on specific hardward so it can be
 enabled from the beginning. Use the tool you want to communicate by
-modbus-tco to port 502. In the file [Inc/mb_addrs.h](Inc/mb_addrs.h)
+modbus-tcp to port 502. In the file [Inc/mb_addrs.h](Inc/mb_addrs.h)
 the addresses of the protocol are described.
 
 An excellent tool for testing and debugging with modbus-tcp protocol
