@@ -87,6 +87,7 @@ int32_t enc_get_current(ENCODERROT *_rot)
 
 inline void enc_set_current(ENCODERROT *_rot, int32_t val)
 {
+	_rot->raw_last = _get_raw(_rot);
 	_rot->current = val;
 }
 
@@ -102,7 +103,7 @@ void enc_setup(ENCODERROT *_rot, int32_t min, int32_t max, int32_t current,
 {
 	_rot->min = min;
 	_rot->max = max;
-        _rot->current = current;
+	enc_set_current(_rot, current);
 	_rot->inc = inc;
 	if ( sw1 > -1 ) _rot->sw1 = sw1;
 	if ( sw2 > -1 ) _rot->sw2 = sw2;
